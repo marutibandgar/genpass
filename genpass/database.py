@@ -24,85 +24,91 @@ import sqlite3  # library for database
 
 
 class DatabaseConnection(object):
-	""" Class of database entries for user's information."""
+    """ Class of database entries for user's information."""
 
-	def __init__(self):
-		"""Used to create database and then to connect with generated databse file"""
-		self.con = sqlite3.connect('generated_password.db')
-		self.cursor_obj = self.con.cursor()
+    def __init__(self):
+        """Used to create database and then to connect with generated databse file"""
+        self.con = sqlite3.connect("generated_password.db")
+        self.cursor_obj = self.con.cursor()
 
-	def create_table(self):
-		"""Checked for table is created? if not then created as per required values """
-		self.cursor_obj.execute(
-			"""CREATE TABLE IF NOT EXISTS passwords
-			(id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar)
-			""")
-		self.con.commit()
+    def create_table(self):
+        """Checked for table is created? if not then created as per required values """
+        self.cursor_obj.execute(
+            """CREATE TABLE IF NOT EXISTS passwords(
+            id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar
+            )"""
+        )
+        self.con.commit()
 
-	def secrete_table(self):
-		"""Table to store secrete key"""
-		self.cursor_obj.execute(
-			"""
-			CREATE TABLE IF NOT EXISTS secrete(email text NOT NULL UNIQUE, key integer NOT NULL)
+    def secrete_table(self):
+        """Table to store secrete key"""
+        self.cursor_obj.execute(
+            """CREATE TABLE IF NOT EXISTS secrete(email text NOT NULL UNIQUE, key integer NOT NULL)
             """
-		)
-		self.con.commit()
+        )
+        self.con.commit()
 
-	def add_key(self, email, key):
-		"""Add key in database"""
+    def add_key(self, email, key):
+        """Add key in database"""
 
-		try:
-			self.email = email
-			self.key = key
-			self.cursor_obj.execute(
-				"""INSERT INTO secrete(email, key) VALUES (?, ?)""",
-				(self.email, self.key), )
-			self.con.commit()
-		except sqlite3.IntegrityError:
-			print("Email ID already exists")
+        try:
+            self.email = email
+            self.key = key
+            self.cursor_obj.execute(
+                """INSERT INTO secrete(email, key) VALUES (?, ?)""", (self.email, self.key),
+            )
+            self.con.commit()
+        except sqlite3.IntegrityError:
+            print("Email ID already exists")
 
-	def get_key(self):
-		"""All inserted data will showed"""
-		self.cursor_obj.execute("""SELECT key FROM passwords""")
-		rows = self.cursor_obj.fetchall()
-		for row in rows:
-			return row
-		self.con.commit()
+    def get_key(self):
+        """All inserted data will showed"""
+        self.cursor_obj.execute("""SELECT key FROM passwords""")
+        rows = self.cursor_obj.fetchall()
+        for row in rows:
+            return row
+        self.con.commit()
 
-	def insert_data(self, portal_name, password):
-		"""Adding values into database"""
-		try:
-			self.portal_name = portal_name
-			self.password = password
-			self.cursor_obj.execute("""INSERT INTO passwords(portal_name, password) VALUES (?, ?)""",
-									(self.portal_name, self.password),)
-			self.con.commit()
-		except sqlite3.IntegrityError:
-			print("Portal name already exists")
+    def insert_data(self, portal_name, password):
+        """Adding values into database"""
+        try:
+            self.portal_name = portal_name
+            self.password = password
+            self.cursor_obj.execute(
+                """INSERT INTO passwords(portal_name, password) VALUES (?, ?)""",
+                (self.portal_name, self.password),
+            )
+            self.con.commit()
+        except sqlite3.IntegrityError:
+            print("Portal name already exists")
 
-	def delete_data(self, portal_name):
-		"""Deleting values from database"""
-		self.portal_name = portal_name
+    def delete_data(self, portal_name):
+        """Deleting values from database"""
+        self.portal_name = portal_name
 
-		self.cursor_obj.execute("""DELETE from passwords where portal_name = ?""",
-								(self.portal_name,))
-		self.con.commit()
+        self.cursor_obj.execute(
+            """DELETE from passwords where portal_name = ?""", (self.portal_name,)
+        )
+        self.con.commit()
 
-	def update_data(self, portal_name, password):
-		"""Updating values in database"""
-		self.portal_name = portal_name
-		self.password = password
-		self.cursor_obj.execute("""UPDATE passwords SET password =? WHERE portal_name =?""",
-								(self.password, self.portal_name))
-		self.con.commit()
+    def update_data(self, portal_name, password):
+        """Updating values in database"""
+        self.portal_name = portal_name
+        self.password = password
+        self.cursor_obj.execute(
+            """UPDATE passwords SET password =? WHERE portal_name =?""",
+            (self.password, self.portal_name),
+        )
+        self.con.commit()
 
-	def show_data(self, portal_name):
-		"""All inserted data will showed"""
-		self.portal_name = portal_name
+    def show_data(self, portal_name):
+        """All inserted data will showed"""
+        self.portal_name = portal_name
 
-		self.cursor_obj.execute("""SELECT password FROM passwords WHERE portal_name=?""",
-								(self.portal_name,))
-		rows = self.cursor_obj.fetchall()
-		for row in rows:
-			return row[0]
-		self.con.commit()
+        self.cursor_obj.execute(
+            """SELECT password FROM passwords WHERE portal_name=?""", (self.portal_name,)
+        )
+        rows = self.cursor_obj.fetchall()
+        for row in rows:
+            return row[0]
+        self.con.commit()

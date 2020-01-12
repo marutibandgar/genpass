@@ -32,9 +32,9 @@ db_obj = DatabaseConnection()
 def secretekey():
     """Used to provide secrete to user to see saved passwords"""
     key = random.randint(1111, 9999)
-    email = click.prompt('Enter Email ID')
+    email = click.prompt("Enter Email ID")
     email_pass = click.prompt("Enter email password")
-    mail = smtplib.SMTP('smtp.gmail.com', 587)
+    mail = smtplib.SMTP("smtp.gmail.com", 587)
     mail.ehlo()
     mail.login(email, email_pass)
     mail.starttls(email, email, key)
@@ -50,23 +50,23 @@ def version():
 @click.command(help="Delete password")
 def delpass():
     """used to delete existing password"""
-    portal_name = click.prompt('Enter portal name', default="None")
+    portal_name = click.prompt("Enter portal name", default="None")
     db_obj.delete_data(portal_name=portal_name)
 
 
 @click.command(help="Update password")
 def modpass():
     """Update existing password"""
-    portal_name = click.prompt('Enter portal name', default="None")
-    mod = click.prompt('Enter new password', default="None", hide_input=True)
+    portal_name = click.prompt("Enter portal name", default="None")
+    mod = click.prompt("Enter new password", default="None", hide_input=True)
     db_obj.update_data(portal_name=portal_name, password=mod)
 
 
 @click.command(help="Save existing passwords")
 def savepass():
     """Used to take portal name and password from user"""
-    portal_name = click.prompt('Enter portal name', default="None")
-    pwd = click.prompt('Enter your password', default="None", hide_input=True)
+    portal_name = click.prompt("Enter portal name", default="None")
+    pwd = click.prompt("Enter your password", default="None", hide_input=True)
     db_obj.create_table()
     db_obj.insert_data(portal_name=portal_name, password=pwd)
 
@@ -74,7 +74,7 @@ def savepass():
 @click.command(help="Create new password")
 def createpass():
     """Used for taking input from user to create password"""
-    portal_name = click.prompt('Enter portal name', default="None")
+    portal_name = click.prompt("Enter portal name", default="None")
     password = diceware.get_passphrase()
     db_obj.create_table()
     db_obj.insert_data(portal_name=portal_name, password=password)
@@ -82,9 +82,9 @@ def createpass():
 
 @click.command(help="Show password")
 def showpass():
-    portal_name = click.prompt('Enter portal name', default="None")
+    portal_name = click.prompt("Enter portal name", default="None")
     spass = db_obj.show_data(portal_name)
-    secrete_key = click.prompt('Enter secrete key', default="None")
+    secrete_key = click.prompt("Enter secrete key", default="None")
     key = db_obj.get_key()
     if secrete_key == key:
         click.echo(spass)

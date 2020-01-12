@@ -23,7 +23,6 @@ import click  # Used for command line interface
 import diceware  # Used for creating password
 from genpass.database import DatabaseConnection
 import random
-import smtplib
 
 db_obj = DatabaseConnection()
 
@@ -31,15 +30,15 @@ db_obj = DatabaseConnection()
 @click.command(help="Get secrete key")
 def secretekey():
     """Used to provide secrete to user to see saved passwords"""
-    key = random.randint(1111, 9999)
+    secrete_key = random.randint(1111, 9999)
     email = click.prompt("Enter Email ID")
-    email_pass = click.prompt("Enter email password")
-    mail = smtplib.SMTP("smtp.gmail.com", 587)
-    mail.ehlo()
-    mail.login(email, email_pass)
-    mail.starttls(email, email, key)
     db_obj.secrete_table()
-    db_obj.add_key(email=email, key=key)
+    exist_key = db_obj.get_key(email)
+    if exist_key is None:
+        db_obj.add_key(email=email, key=secrete_key)
+
+    key = db_obj.get_key(email)
+    click.echo(f"This is your secrete key: {key}. Please do not share with anyone!!!")
 
 
 @click.command(help="Show Version")
@@ -67,8 +66,9 @@ def savepass():
     """Used to take portal name and password from user"""
     portal_name = click.prompt("Enter portal name", default="None")
     pwd = click.prompt("Enter your password", default="None", hide_input=True)
+    attach_key = db_obj.whole_key()
     db_obj.create_table()
-    db_obj.insert_data(portal_name=portal_name, password=pwd)
+    db_obj.insert_data(portal_name=portal_name, password=pwd, key=attach_key)
 
 
 @click.command(help="Create new password")
@@ -76,17 +76,21 @@ def createpass():
     """Used for taking input from user to create password"""
     portal_name = click.prompt("Enter portal name", default="None")
     password = diceware.get_passphrase()
+    attach_key = db_obj.whole_key()
     db_obj.create_table()
-    db_obj.insert_data(portal_name=portal_name, password=password)
+    db_obj.insert_data(portal_name=portal_name, password=password, key=attach_key)
 
 
 @click.command(help="Show password")
 def showpass():
+    flag = 0
     portal_name = click.prompt("Enter portal name", default="None")
-    spass = db_obj.show_data(portal_name)
-    secrete_key = click.prompt("Enter secrete key", default="None")
-    key = db_obj.get_key()
-    if secrete_key == key:
-        click.echo(spass)
-    else:
-        click.echo("Invalid secrete key. Please try again!!!")
+    while flag < 3:
+        key = click.prompt("Enter secrete key", hide_input=True)
+        spass = db_obj.show_data(portal_name, key)
+        if spass is None:
+            flag = flag + 1
+            click.echo("Invalid secrete key or portal name. Please try again!!!")
+        else:
+            click.echo(spass)
+            exit()

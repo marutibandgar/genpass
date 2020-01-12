@@ -35,7 +35,7 @@ class DatabaseConnection(object):
         """Checked for table is created? if not then created as per required values """
         self.cursor_obj.execute(
             """CREATE TABLE IF NOT EXISTS passwords(
-            id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar
+            id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar, key integer
             )"""
         )
         self.con.commit()
@@ -55,28 +55,40 @@ class DatabaseConnection(object):
             self.email = email
             self.key = key
             self.cursor_obj.execute(
-                """INSERT INTO secrete(email, key) VALUES (?, ?)""", (self.email, self.key),
+                """INSERT INTO secrete(email, key) VALUES (?, ?)""", (self.email, self.key)
             )
             self.con.commit()
         except sqlite3.IntegrityError:
             print("Email ID already exists")
 
-    def get_key(self):
+    def get_key(self, email):
         """All inserted data will showed"""
-        self.cursor_obj.execute("""SELECT key FROM passwords""")
+
+        self.email = email
+        self.cursor_obj.execute("""SELECT key FROM secrete WHERE email = ?""", (self.email,))
         rows = self.cursor_obj.fetchall()
         for row in rows:
-            return row
+            return row[0]
         self.con.commit()
 
-    def insert_data(self, portal_name, password):
+    def whole_key(self):
+        """All inserted data will showed"""
+
+        self.cursor_obj.execute("""SELECT * FROM secrete""")
+        rows = self.cursor_obj.fetchall()
+        for row in rows:
+            return row[1]
+        self.con.commit()
+
+    def insert_data(self, portal_name, password, key):
         """Adding values into database"""
         try:
             self.portal_name = portal_name
             self.password = password
+            self.key = key
             self.cursor_obj.execute(
-                """INSERT INTO passwords(portal_name, password) VALUES (?, ?)""",
-                (self.portal_name, self.password),
+                """INSERT INTO passwords(portal_name, password, key) VALUES (?, ?, ?)""",
+                (self.portal_name, self.password, self.key),
             )
             self.con.commit()
         except sqlite3.IntegrityError:
@@ -101,12 +113,13 @@ class DatabaseConnection(object):
         )
         self.con.commit()
 
-    def show_data(self, portal_name):
+    def show_data(self, portal_name, key):
         """All inserted data will showed"""
         self.portal_name = portal_name
-
+        self.key = key
         self.cursor_obj.execute(
-            """SELECT password FROM passwords WHERE portal_name=?""", (self.portal_name,)
+            """SELECT password FROM passwords WHERE portal_name=? AND key = ?""",
+            (self.portal_name, self.key),
         )
         rows = self.cursor_obj.fetchall()
         for row in rows:

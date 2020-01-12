@@ -22,8 +22,24 @@ SOFTWARE.
 import click  # Used for command line interface
 import diceware  # Used for creating password
 from genpass.database import DatabaseConnection
+import random
+import smtplib
 
 db_obj = DatabaseConnection()
+
+
+@click.command(help="Get secrete key")
+def secretekey():
+    """Used to provide secrete to user to see saved passwords"""
+    key = random.randint(1111, 9999)
+    email = click.prompt('Enter Email ID')
+    email_pass = click.prompt("Enter email password")
+    mail = smtplib.SMTP('smtp.gmail.com', 587)
+    mail.ehlo()
+    mail.login(email, email_pass)
+    mail.starttls(email, email, key)
+    db_obj.secrete_table()
+    db_obj.add_key(email=email, key=key)
 
 
 @click.command(help="Show Version")
@@ -68,4 +84,9 @@ def createpass():
 def showpass():
     portal_name = click.prompt('Enter portal name', default="None")
     spass = db_obj.show_data(portal_name)
-    print(spass)
+    secrete_key = click.prompt('Enter secrete key', default="None")
+    key = db_obj.get_key()
+    if secrete_key == key:
+        click.echo(spass)
+    else:
+        click.echo("Invalid secrete key. Please try again!!!")

@@ -39,6 +39,36 @@ class DatabaseConnection(object):
 			""")
 		self.con.commit()
 
+	def secrete_table(self):
+		"""Table to store secrete key"""
+		self.cursor_obj.execute(
+			"""
+			CREATE TABLE IF NOT EXISTS secrete(email text NOT NULL UNIQUE, key integer NOT NULL)
+            """
+		)
+		self.con.commit()
+
+	def add_key(self, email, key):
+		"""Add key in database"""
+
+		try:
+			self.email = email
+			self.key = key
+			self.cursor_obj.execute(
+				"""INSERT INTO secrete(email, key) VALUES (?, ?)""",
+				(self.email, self.key), )
+			self.con.commit()
+		except sqlite3.IntegrityError:
+			print("Email ID already exists")
+
+	def get_key(self):
+		"""All inserted data will showed"""
+		self.cursor_obj.execute("""SELECT key FROM passwords""")
+		rows = self.cursor_obj.fetchall()
+		for row in rows:
+			return row
+		self.con.commit()
+
 	def insert_data(self, portal_name, password):
 		"""Adding values into database"""
 		try:

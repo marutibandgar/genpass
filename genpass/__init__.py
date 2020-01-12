@@ -26,6 +26,7 @@ from genpass.password import showpass
 from genpass.password import delpass
 from genpass.password import version
 from genpass.password import modpass
+from getpass.password import secretekey
 
 
 @click.group()
@@ -39,6 +40,7 @@ main.add_command(showpass)
 main.add_command(savepass)
 main.add_command(delpass)
 main.add_command(version)
+main.add_commmand(secretekey)
 
 if __name__ == "__main__":
     main()
